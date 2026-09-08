@@ -151,6 +151,7 @@ button.gros {
   transition: transform .1s ease;
 }
 button.gros:hover { transform: translateY(-2px); }
+button.gros:disabled { opacity: .5; cursor: default; transform: none; }
 button.gros.plein-large { width: 100%; margin-top: 8px; }
 
 button.secondaire {

@@ -755,6 +755,7 @@
     elRetour.hidden = true;
     elRetour.innerHTML = "";
     elContinuer.hidden = true;
+    elContinuer.disabled = false;
     elZone.innerHTML = "";
 
     if (q.type === "qcm") rendreQCM(q);
@@ -784,17 +785,23 @@
       '</div>';
     elZone.appendChild(wrap);
 
+    const btnOui = document.getElementById("btn-cahier-oui");
+    const btnNon = document.getElementById("btn-cahier-non");
+
     document.getElementById("btn-voir-correction").addEventListener("click", function () {
       this.hidden = true;
       document.getElementById("bloc-correction").hidden = false;
+      // Anti-saut : on laisse le temps de comparer avant d'autoriser l'auto-évaluation.
+      btnOui.disabled = true; btnNon.disabled = true;
+      setTimeout(() => { btnOui.disabled = false; btnNon.disabled = false; }, 600);
     });
-    document.getElementById("btn-cahier-oui").addEventListener("click", () => {
-      if (session.repondu) return;
+    btnOui.addEventListener("click", () => {
+      if (session.repondu || btnOui.disabled) return;
       wrap.querySelectorAll("button").forEach(b => b.disabled = true);
       finaliserReponse(q, true, { montrerReponse: false });
     });
-    document.getElementById("btn-cahier-non").addEventListener("click", () => {
-      if (session.repondu) return;
+    btnNon.addEventListener("click", () => {
+      if (session.repondu || btnNon.disabled) return;
       wrap.querySelectorAll("button").forEach(b => b.disabled = true);
       finaliserReponse(q, false, { montrerReponse: false });
     });
@@ -852,7 +859,9 @@
     wrap.appendChild(valider);
 
     elZone.appendChild(wrap);
-    input.addEventListener("keydown", e => { if (e.key === "Enter") valider.click(); });
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") { e.preventDefault(); valider.click(); }
+    });
     setTimeout(() => input.focus(), 50);
   }
 
@@ -934,12 +943,20 @@
     elSerie.textContent = "🔥 série " + session.serie;
     elSerie.classList.toggle("inactive", session.serie < 2);
     elRetour.hidden = false;
-    elContinuer.hidden = false;
     elContinuer.textContent = (session.index + 1 < session.questions.length) ? "Continuer" : "Voir mon résultat";
-    elContinuer.focus();
+    elContinuer.hidden = false;
+
+    // Anti-saut : on empêche un appui « réflexe » (Entrée ou double-clic)
+    // de passer à la question suivante avant d'avoir vu la correction.
+    elContinuer.disabled = true;
+    setTimeout(() => { elContinuer.disabled = false; }, 600);
+
+    // On amène le bouton à l'écran s'il est hors champ (utile sur téléphone).
+    if (elContinuer.scrollIntoView) elContinuer.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
   elContinuer.addEventListener("click", () => {
+    if (!session || !session.repondu || elContinuer.disabled) return;
     session.index += 1;
     if (session.index < session.questions.length) rendreQuestion();
     else terminerSession();
