@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>École de Sorcellerie — Français CE2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ================= DÉCOR : CIEL DE POUDLARD ================= -->
+  <div id="ciel" aria-hidden="true">
+    <svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="lune" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fffef2"/>
+          <stop offset="55%" stop-color="#f3eecf"/>
+          <stop offset="100%" stop-color="#f3eecf" stop-opacity="0"/>
+        </radialGradient>
+        <linearGradient id="brume" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#141a3c" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#0b1026"/>
+        </linearGradient>
+      </defs>
+
+      <!-- lune -->
+      <circle cx="1160" cy="190" r="78" fill="url(#lune)"/>
+      <circle cx="1160" cy="190" r="46" fill="#fbf8e6"/>
+
+      <!-- collines -->
+      <path d="M0 806 Q 380 736 760 792 T 1440 772 V900 H0 Z" fill="#0e1430"/>
+
+      <!-- château de Poudlard (silhouette originale) -->
+      <g fill="#080c20" transform="translate(0 150)">
+        <rect x="452" y="590" width="40" height="180"/>
+        <polygon points="452,590 472,548 492,590"/>
+        <rect x="500" y="540" width="46" height="230"/>
+        <polygon points="500,540 523,492 546,540"/>
+        <rect x="560" y="468" width="60" height="302"/>
+        <polygon points="560,468 590,404 620,468"/>
+        <rect x="620" y="518" width="46" height="252"/>
+        <polygon points="620,518 643,470 666,518"/>
+        <rect x="666" y="426" width="82" height="344"/>
+        <polygon points="666,426 707,352 748,426"/>
+        <rect x="748" y="516" width="40" height="254"/>
+        <polygon points="748,516 768,472 788,516"/>
+        <rect x="788" y="558" width="54" height="212"/>
+        <polygon points="788,558 815,510 842,558"/>
+        <rect x="842" y="612" width="38" height="158"/>
+        <polygon points="842,612 861,576 880,612"/>
+        <path d="M430 770 H900 V900 H430 Z"/>
+      </g>
+
+      <!-- fenêtres allumées -->
+      <g fill="#ffd873" transform="translate(0 150)">
+        <rect x="686" y="470" width="8" height="12"/>
+        <rect x="708" y="470" width="8" height="12"/>
+        <rect x="686" y="508" width="8" height="12"/>
+        <rect x="708" y="508" width="8" height="12"/>
+        <rect x="579" y="520" width="7" height="11"/>
+        <rect x="597" y="560" width="7" height="11"/>
+        <rect x="636" y="560" width="6" height="10"/>
+        <rect x="759" y="600" width="7" height="11"/>
+        <rect x="806" y="600" width="7" height="11"/>
+        <rect x="514" y="580" width="6" height="10"/>
+      </g>
+
+      <rect x="0" y="600" width="1440" height="300" fill="url(#brume)"/>
+    </svg>
+  </div>
+
+  <div class="enveloppe">
+
+    <header>
+      <h1>⚡ École de Sorcellerie — Français CE2</h1>
+      <nav>
+        <button data-aller="ecran-profils">Sorciers</button>
+        <button data-aller="ecran-accueil" class="actif">Accueil</button>
+        <button data-aller="ecran-progression">Ma progression</button>
+      </nav>
+    </header>
+
+    <main>
+      <!-- ================= CHOIX DU SORCIER (profils) ================= -->
+      <section id="ecran-profils" class="ecran actif">
+        <div class="carte" id="contenu-profils"><!-- rempli par le JS --></div>
+      </section>
+
+      <!-- ================= CRÉATION D'UN SORCIER ================= -->
+      <section id="ecran-creation" class="ecran">
+        <div class="carte" id="contenu-creation"><!-- rempli par le JS --></div>
+      </section>
+
+      <!-- ================= ACCUEIL ================= -->
+      <section id="ecran-accueil" class="ecran">
+        <div class="carte" id="contenu-accueil"><!-- rempli par le JS --></div>
+      </section>
+
+      <!-- ================= CHOIXPEAU ================= -->
+      <section id="ecran-choixpeau" class="ecran">
+        <div class="carte">
+          <h2>🎩 Le Choixpeau magique</h2>
+          <p class="consigne">Réponds honnêtement, le Choixpeau lit dans tes pensées…</p>
+          <div id="contenu-choixpeau"><!-- rempli par le JS --></div>
+        </div>
+      </section>
+
+      <!-- ================= QUIZ ================= -->
+      <section id="ecran-quiz" class="ecran">
+        <div class="carte">
+          <div class="quiz-haut">
+            <span id="quiz-compteur">Question 1 / 10</span>
+            <span id="quiz-serie" class="serie-flamme inactive">🔥 série 0</span>
+          </div>
+          <div class="barre-xp"><span id="quiz-barre-progression"></span></div>
+
+          <p class="consigne" id="quiz-consigne"></p>
+          <p class="phrase-question" id="quiz-phrase"></p>
+
+          <div id="quiz-zone-reponse"><!-- QCM ou saisie, rempli par le JS --></div>
+
+          <div id="quiz-retour" hidden></div>
+          <button id="quiz-continuer" class="gros plein-large" hidden>Continuer</button>
+        </div>
+      </section>
+
+      <!-- ================= RÉSULTAT ================= -->
+      <section id="ecran-resultat" class="ecran">
+        <div class="carte">
+          <h2 class="centre">Entraînement terminé !</h2>
+          <div class="resultat-score" id="resultat-score">7 / 10</div>
+          <div class="resultat-lignes" id="resultat-lignes"></div>
+          <div id="resultat-deblocages"></div>
+          <div class="boutons-fin">
+            <button class="gros" id="btn-encore">Encore un entraînement</button>
+            <button class="secondaire" id="btn-voir-progression">Voir ma progression</button>
+            <button class="secondaire" id="btn-retour-accueil">Accueil</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= PROGRESSION ================= -->
+      <section id="ecran-progression" class="ecran">
+        <div class="carte" id="contenu-progression"><!-- rempli par le JS --></div>
+      </section>
+    </main>
+
+  </div>
+
+  <script src="contenu.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
