@@ -15,7 +15,7 @@
      1. PARAMÈTRES DU JEU  (faciles à ajuster)
      =========================================================================== */
 
-  const QUESTIONS_PAR_SESSION = 10;
+  const QUESTIONS_PAR_SESSION = 6;
   const XP_BONNE_REPONSE = 10;
 
   // Bonus de série : nombre de bonnes réponses d'affilée -> XP bonus
@@ -221,7 +221,14 @@
   // Clé stable d'une question, pour retenir qu'elle a été réussie.
   // Elle dépend du thème et du texte : modifier le texte "réinitialise" la question.
   function cleQuestion(q) {
-    const base = (q._themeId || "") + "|" + (q.type || "") + "|" + (q.phrase || "");
+    let base;
+    if (q.type === "tableau" || q.type === "erreur") {
+      base = (q._themeId || "") + "|" + q.type + "|" + (q.verbe || "") + "|" +
+             (q.consigne || "") + "|" + (q.fausse || "") + "|" +
+             (q.formes ? JSON.stringify(q.formes) : "");
+    } else {
+      base = (q._themeId || "") + "|" + (q.type || "") + "|" + (q.phrase || "");
+    }
     let h = 0;
     for (let i = 0; i < base.length; i++) h = (Math.imul(h, 31) + base.charCodeAt(i)) | 0;
     return "q" + (h >>> 0).toString(36);
@@ -569,7 +576,7 @@
       '</div>' +
       '<button class="lien-changer" id="btn-changer-sorcier">↔ Changer de sorcier</button>' +
       '<h2 style="margin-top:14px">Choisis ton entraînement</h2>' +
-      '<p class="consigne">Une session = ' + QUESTIONS_PAR_SESSION + ' questions (environ 1 sur 3 à écrire sur le cahier). Les questions déjà réussies ne reviennent pas.</p>' +
+      '<p class="consigne">Une session = ' + QUESTIONS_PAR_SESSION + ' questions courtes. Les questions déjà réussies ne reviennent pas.</p>' +
       '<div class="liste-themes" id="liste-themes"></div>' +
       '<p class="note">Période en cours : ' + escapeHtml(PERIODES.periode1.titre) + '</p>';
 
@@ -687,8 +694,9 @@
   }
 
   // themes = tableau de thèmes (voir PERIODES). On enlève les questions déjà
-  // réussies, on vise environ 1/3 de questions "cahier", et on ne rallonge
-  // jamais la session en répétant des questions.
+  // réussies, on vise environ 1/3 de questions "lentes" (cahier / tableau), et
+  // on ne rallonge jamais la session en répétant des questions.
+  const TYPES_LENTS = ["cahier", "tableau"];
   function demarrerSession(themes) {
     const toutes = collecterQuestions(themes);
     let dispo = toutes.filter(q => !estReussie(q));
@@ -704,13 +712,13 @@
     }
 
     const cible = Math.min(QUESTIONS_PAR_SESSION, dispo.length);
-    const nbCahierVoulu = Math.round(cible / 3);
+    const nbLentsVoulu = Math.round(cible / 3);
 
-    const cahier = melanger(dispo.filter(q => q.type === "cahier"));
-    const autres = melanger(dispo.filter(q => q.type !== "cahier"));
+    const lents = melanger(dispo.filter(q => TYPES_LENTS.indexOf(q.type) !== -1));
+    const autres = melanger(dispo.filter(q => TYPES_LENTS.indexOf(q.type) === -1));
 
-    const nbCahier = Math.min(nbCahierVoulu, cahier.length);
-    let choisies = cahier.slice(0, nbCahier).concat(autres.slice(0, cible - nbCahier));
+    const nbLents = Math.min(nbLentsVoulu, lents.length);
+    let choisies = lents.slice(0, nbLents).concat(autres.slice(0, cible - nbLents));
     if (choisies.length < cible) {
       const reste = dispo.filter(q => choisies.indexOf(q) === -1);
       choisies = choisies.concat(melanger(reste).slice(0, cible - choisies.length));
@@ -750,7 +758,8 @@
     elSerie.classList.toggle("inactive", session.serie < 2);
 
     elConsigne.textContent = q.consigne || "";
-    elPhrase.innerHTML = phraseAvecTrou(q.phrase);
+    elPhrase.innerHTML = q.phrase ? phraseAvecTrou(q.phrase) : "";
+    elPhrase.hidden = !q.phrase;
 
     elRetour.hidden = true;
     elRetour.innerHTML = "";
@@ -760,7 +769,17 @@
 
     if (q.type === "qcm") rendreQCM(q);
     else if (q.type === "cahier") rendreCahier(q);
+    else if (q.type === "tableau") rendreTableau(q);
+    else if (q.type === "erreur") rendreErreur(q);
     else rendreSaisie(q);
+  }
+
+  // Conjugaison complète en une ligne : "je chante, tu chantes, il chante…"
+  function conjugaisonEnLigne(formes) {
+    return formes.map(f => {
+      const forme = f.forme != null ? f.forme : (f.debut + f.fin);
+      return f.pron + (/['’]$/.test(f.pron) ? "" : " ") + forme;
+    }).join(", ") + ".";
   }
 
   function phraseAvecTrou(phrase) {
@@ -804,6 +823,167 @@
       if (session.repondu || btnNon.disabled) return;
       wrap.querySelectorAll("button").forEach(b => b.disabled = true);
       finaliserReponse(q, false, { montrerReponse: false });
+    });
+  }
+
+  /* --- Type "tableau" : compléter une conjugaison complète -------------------
+     q.verbe : "chanter"
+     q.formes : 6 entrées dans l'ordre je / tu / il / nous / vous / ils
+       - fixe  : { pron: "je", forme: "chante" }
+       - trou  : { pron: "tu", debut: "chant", fin: "es" }   (debut peut être "")
+  ------------------------------------------------------------------------------ */
+  function rendreTableau(q) {
+    const wrap = document.createElement("div");
+    wrap.className = "zone-tableau";
+
+    const titre = document.createElement("div");
+    titre.className = "tab-titre";
+    titre.textContent = "Le verbe « " + q.verbe + " » au présent";
+    wrap.appendChild(titre);
+
+    const grille = document.createElement("div");
+    grille.className = "tab-grille";
+    q.formes.forEach((f, i) => {
+      const cellePron = document.createElement("div");
+      cellePron.className = "pron";
+      cellePron.textContent = f.pron;
+      grille.appendChild(cellePron);
+
+      const celleForme = document.createElement("div");
+      celleForme.className = "forme";
+      if (f.fin == null) {
+        celleForme.textContent = f.forme;
+      } else {
+        if (f.debut) {
+          const rad = document.createElement("span");
+          rad.className = "radical";
+          rad.textContent = f.debut;
+          celleForme.appendChild(rad);
+        }
+        const inp = document.createElement("input");
+        inp.type = "text";
+        inp.autocomplete = "off";
+        inp.autocapitalize = "off";
+        inp.spellcheck = false;
+        inp.dataset.i = i;
+        inp.setAttribute("aria-label", f.pron);
+        celleForme.appendChild(inp);
+      }
+      grille.appendChild(celleForme);
+    });
+    wrap.appendChild(grille);
+
+    const accents = document.createElement("div");
+    accents.className = "accents";
+    ["é", "è", "ê", "à", "â", "î", "ï", "ç", "œ", "’"].forEach(c => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = c;
+      b.addEventListener("click", () => {
+        const inp = wrap.querySelector("input:focus") || wrap.querySelector("input:not([disabled])");
+        if (!inp) return;
+        const d = inp.selectionStart, fi = inp.selectionEnd;
+        inp.value = inp.value.slice(0, d) + c + inp.value.slice(fi);
+        inp.focus();
+        inp.selectionStart = inp.selectionEnd = d + 1;
+      });
+      accents.appendChild(b);
+    });
+    wrap.appendChild(accents);
+
+    const valider = document.createElement("button");
+    valider.className = "gros";
+    valider.textContent = "Valider";
+    valider.addEventListener("click", () => {
+      if (session.repondu) return;
+      validerTableau(q, wrap);
+    });
+    wrap.appendChild(valider);
+
+    elZone.appendChild(wrap);
+    wrap.addEventListener("keydown", e => {
+      if (e.key === "Enter") { e.preventDefault(); valider.click(); }
+    });
+    const premier = wrap.querySelector("input");
+    if (premier) setTimeout(() => premier.focus(), 50);
+  }
+
+  function validerTableau(q, wrap) {
+    let toutJuste = true;
+    wrap.querySelectorAll("input").forEach(inp => {
+      const f = q.formes[+inp.dataset.i];
+      const saisi = inp.value.trim();
+      const ok = normalise(saisi) === normalise(f.fin) ||
+                 normalise(saisi) === normalise((f.debut || "") + f.fin);
+      inp.disabled = true;
+      inp.classList.add(ok ? "juste" : "faux");
+      if (!ok) {
+        toutJuste = false;
+        const corr = document.createElement("span");
+        corr.className = "tab-corrige";
+        corr.textContent = "→ " + (f.debut || "") + f.fin;
+        inp.parentNode.appendChild(corr);
+      }
+    });
+    wrap.querySelectorAll(".accents, button.gros").forEach(el => el.hidden = true);
+
+    const ligne = document.createElement("div");
+    ligne.className = "tab-complet";
+    ligne.textContent = conjugaisonEnLigne(q.formes);
+    wrap.appendChild(ligne);
+
+    finaliserReponse(q, toutJuste, { detailFaux: "Compare avec la conjugaison complète ci-dessus." });
+  }
+
+  /* --- Type "erreur" : trouver la forme mal écrite --------------------------
+     q.verbe, q.formes : liste des 6 formes complètes (chaînes),
+     q.fausse : la forme incorrecte (présente dans q.formes),
+     q.correcte : sa correction.
+  ------------------------------------------------------------------------------ */
+  function rendreErreur(q) {
+    const wrap = document.createElement("div");
+    wrap.className = "zone-erreur";
+
+    const titre = document.createElement("div");
+    titre.className = "tab-titre";
+    titre.textContent = "Le verbe « " + q.verbe + " » au présent";
+    wrap.appendChild(titre);
+
+    q.formes.forEach(forme => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = forme;
+      b.addEventListener("click", () => {
+        if (session.repondu) return;
+        validerErreur(q, forme, b, wrap);
+      });
+      wrap.appendChild(b);
+    });
+    elZone.appendChild(wrap);
+  }
+
+  function validerErreur(q, forme, btn, wrap) {
+    const juste = normalise(forme) === normalise(q.fausse);
+    wrap.querySelectorAll("button").forEach(b => {
+      b.disabled = true;
+      if (normalise(b.textContent) === normalise(q.fausse)) {
+        b.classList.add("faute");
+        const fl = document.createElement("span");
+        fl.className = "fleche-corr";
+        fl.textContent = "→ " + q.correcte;
+        b.after(fl);
+      }
+    });
+    if (juste) btn.classList.add("trouve");
+
+    const ligne = document.createElement("div");
+    ligne.className = "tab-complet";
+    ligne.textContent = "Conjugaison correcte : " +
+      q.formes.map(f => normalise(f) === normalise(q.fausse) ? q.correcte : f).join(", ") + ".";
+    wrap.appendChild(ligne);
+
+    finaliserReponse(q, juste, {
+      detailFaux: "La forme mal écrite était « " + q.fausse + " » → il faut écrire « " + q.correcte + " »."
     });
   }
 
@@ -928,12 +1108,18 @@
       bip("bon");
     } else {
       session.serie = 0;
+      let corps;
+      if (opts.montrerReponse) {
+        corps = '<div>La bonne réponse était : <strong>' + escapeHtml(q.reponse) + '</strong></div>';
+      } else if (opts.detailFaux) {
+        corps = '<div>' + escapeHtml(opts.detailFaux) + '</div>';
+      } else {
+        corps = '<div>Cet exercice te sera reproposé une prochaine fois.</div>';
+      }
       elRetour.className = "retour mauvais";
       elRetour.innerHTML =
         '<div class="titre-retour">' + (opts.montrerReponse ? "Presque !" : "Ce n'est pas grave !") + '</div>' +
-        (opts.montrerReponse
-          ? '<div>La bonne réponse était : <strong>' + escapeHtml(q.reponse) + '</strong></div>'
-          : '<div>Cet exercice te sera reproposé une prochaine fois.</div>') +
+        corps +
         (q.explication ? '<div>' + escapeHtml(q.explication) + '</div>' : '');
       bip("faux");
     }

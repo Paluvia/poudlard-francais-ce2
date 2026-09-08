@@ -397,6 +397,63 @@ button.secondaire:hover { background: var(--parchemin-fonce); }
 }
 .accents button:hover { border-color: var(--or); }
 
+/* ---------- Question « tableau » (conjugaison à compléter) ---------- */
+.zone-tableau { display: flex; flex-direction: column; gap: 12px; }
+.tab-titre {
+  font-family: "Cinzel", serif;
+  font-weight: 700;
+  color: var(--bordeaux);
+  font-size: 1.1rem;
+}
+.tab-grille {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 14px;
+  align-items: center;
+}
+.tab-grille .pron { text-align: right; color: var(--encre-claire); font-weight: 600; }
+.tab-grille .forme { font-size: 1.15rem; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
+.tab-grille .forme .radical { color: var(--encre); }
+.tab-grille input {
+  font: inherit;
+  font-size: 1.05rem;
+  width: 7em;
+  padding: 6px 8px;
+  border: 2px solid var(--encre-claire);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--encre);
+}
+.tab-grille input.juste { border-color: var(--vert-juste); background: #e5f4e6; color: var(--vert-juste); font-weight: 700; }
+.tab-grille input.faux  { border-color: var(--rouge-faux); background: #f7e4e4; color: var(--rouge-faux); }
+.tab-corrige { color: var(--vert-juste); font-weight: 700; }
+.tab-complet { margin-top: 4px; font-size: .95rem; color: var(--encre-claire); font-style: italic; }
+.zone-tableau .accents[hidden], .zone-tableau button.gros[hidden] { display: none; }
+
+/* ---------- Question « trouve l'erreur » ---------- */
+.zone-erreur { display: flex; flex-direction: column; gap: 8px; }
+.zone-erreur button {
+  font-family: inherit;
+  font-size: 1.1rem;
+  text-align: left;
+  padding: 10px 14px;
+  border: 2px solid var(--encre-claire);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--encre);
+  cursor: pointer;
+}
+.zone-erreur button:hover:not(:disabled) { border-color: var(--or); background: #fffaf0; }
+.zone-erreur button:disabled { cursor: default; }
+.zone-erreur button.faute {
+  background: #f7e4e4;
+  border-color: var(--rouge-faux);
+  color: var(--rouge-faux);
+  text-decoration: line-through;
+}
+.zone-erreur button.trouve { box-shadow: 0 0 0 3px var(--vert-juste) inset; }
+.zone-erreur .fleche-corr { color: var(--vert-juste); font-weight: 700; padding: 2px 0 6px 14px; }
+
 /* ---------- Retour (bon / mauvais) ---------- */
 .retour {
   margin-top: 16px;

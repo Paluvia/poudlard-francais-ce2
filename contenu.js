@@ -11,11 +11,14 @@
    {
      type: "qcm"     -> l'enfant choisit parmi des boutons
         ou "trou"     -> l'enfant écrit la réponse au clavier
-        ou "cahier",  -> l'enfant écrit sur son cahier, regarde la correction,
+        ou "cahier"   -> l'enfant écrit sur son cahier, regarde la correction,
                          puis coche « j'avais bon » ou « j'avais une erreur »
+        ou "tableau"  -> compléter une conjugaison complète (plusieurs cases)
+        ou "erreur",  -> repérer la forme mal écrite dans une conjugaison
 
      consigne: "Choisis la bonne écriture.",   // ce qu'il faut faire
      phrase: "Harry … une baguette magique.",  // le caractère … marque le trou
+                                               // (pas de phrase pour tableau / erreur)
 
      // pour "qcm" :
      choix: ["a", "as", "à"],
@@ -28,6 +31,25 @@
      // pour "cahier" :
      correction: "Les élèves vont à la bibliothèque.",  // la réponse modèle
 
+     // pour "tableau" : le verbe + les 6 personnes dans l'ordre
+     verbe: "chanter",
+     formes: [
+       { pron: "je", forme: "chante" },              // case déjà remplie
+       { pron: "tu", debut: "chant", fin: "es" },    // case à compléter : « chant__ »
+       { pron: "il/elle", debut: "chant", fin: "e" },
+       { pron: "nous", forme: "chantons" },
+       { pron: "vous", debut: "chant", fin: "ez" },
+       { pron: "ils/elles", forme: "chantent" }
+     ],
+     // « debut » peut être "" (l'enfant tape toute la forme, ex. être : { pron:"vous", debut:"", fin:"êtes" })
+     // l'enfant peut taper la terminaison seule ("es") ou la forme entière ("chantes")
+
+     // pour "erreur" : le verbe, les 6 formes complètes, celle qui est fausse et sa correction
+     verbe: "finir",
+     formes: ["je finis","tu finis","il finit","nous finisons","vous finissez","ils finissent"],
+     fausse: "nous finisons",
+     correcte: "nous finissons",
+
      explication: "aller → ils vont…"          // montrée après la réponse
    }
 
@@ -36,9 +58,9 @@
    ---------------------------------------------------------------------------
    - Une question réussie n'est plus reposée à cet enfant (sauf s'il la
      « revoit » depuis l'écran Progression). Une question ratée revient.
-   - Environ 1 question sur 3 d'une session est de type "cahier".
-   - Modifier le texte d'une question (champ "phrase") remet cette question
-     dans les questions « à découvrir » : c'est normal.
+   - Une session = 6 questions ; environ 1 sur 3 est "lente" (cahier / tableau).
+   - Modifier le texte d'une question (champ "phrase", "verbe"…) remet cette
+     question dans les questions « à découvrir » : c'est normal.
 
    ---------------------------------------------------------------------------
    AJOUTER UNE NOUVELLE PÉRIODE
@@ -880,6 +902,302 @@ const periode1 = {
           phrase: "de a à z",
           correction: "a b c d e f g h i j k l m n o p q r s t u v w x y z",
           explication: "26 lettres. C'est l'ordre qu'on utilise dans le dictionnaire." }
+      ]
+    },
+
+    /* ====================================================================== */
+    {
+      id: "conj-2e-groupe",
+      titre: "Le présent : verbes du 2e groupe (-ir)",
+      questions: [
+        { type: "qcm", consigne: "Conjugue au présent.",
+          phrase: "Les élèves … leur exercice de mathématiques. (finir)",
+          choix: ["finissent", "finit", "finis"], reponse: "finissent",
+          explication: "2e groupe : je finis, tu finis, il finit, nous finissons, vous finissez, ils finissent." },
+
+        { type: "qcm", consigne: "Conjugue au présent.",
+          phrase: "Je … un livre à la bibliothèque de Poudlard. (choisir)",
+          choix: ["choisis", "choisit", "choisi"], reponse: "choisis",
+          explication: "Avec « je », le 2e groupe prend -is : je choisis." },
+
+        { type: "qcm", consigne: "Conjugue au présent.",
+          phrase: "Tu … beaucoup cette année ! (grandir)",
+          choix: ["grandis", "grandit", "grandi"], reponse: "grandis",
+          explication: "Avec « tu », le 2e groupe prend -is : tu grandis." },
+
+        { type: "qcm", consigne: "Conjugue au présent (attention au pluriel).",
+          phrase: "Nous … avant de lever la main. (réfléchir)",
+          choix: ["réfléchissons", "réfléchons", "réflechissons"], reponse: "réfléchissons",
+          explication: "Au 2e groupe, « nous » prend -issons : nous réfléchissons." },
+
+        { type: "qcm", consigne: "Conjugue au présent.",
+          phrase: "Vous … le chaudron d'eau claire. (remplir)",
+          choix: ["remplissez", "remplez", "remplisez"], reponse: "remplissez",
+          explication: "Au 2e groupe, « vous » prend -issez : vous remplissez." },
+
+        { type: "qcm", consigne: "Conjugue au présent.",
+          phrase: "Le public … à la fin du match de Quidditch. (applaudir)",
+          choix: ["applaudit", "applaudis", "aplaudit"], reponse: "applaudit",
+          explication: "Avec « il » / « le public », le 2e groupe prend -it : il applaudit." },
+
+        { type: "qcm", consigne: "Terminaison qu'on n'entend pas.",
+          phrase: "En automne, les feuilles … puis tombent. (rougir)",
+          choix: ["rougissent", "rougit", "rougisent"], reponse: "rougissent",
+          explication: "« Les feuilles » = ils : ils rougissent (-issent, muet)." },
+
+        { type: "qcm", consigne: "1er ou 2e groupe ? « grandir » est du 2e groupe.",
+          phrase: "Nous … de quelques centimètres chaque année. (grandir)",
+          choix: ["grandissons", "grandons", "grandisons"], reponse: "grandissons",
+          explication: "grandir → nous grandissons (jamais « grandons »)." },
+
+        { type: "qcm", consigne: "Conjugue au présent.",
+          phrase: "Elle … toujours à la maîtresse. (obéir)",
+          choix: ["obéit", "obéis", "obéi"], reponse: "obéit",
+          explication: "Avec « elle », le 2e groupe prend -it : elle obéit." },
+
+        { type: "qcm", consigne: "Conjugue au présent. « on » se conjugue comme « il ».",
+          phrase: "On … le pas dans la montée. (ralentir)",
+          choix: ["ralentit", "ralentis", "ralenti"], reponse: "ralentit",
+          explication: "on ralentit (comme « il ralentit »)." },
+
+        { type: "trou", consigne: "Conjugue « finir » au présent.",
+          phrase: "Nous … la dictée avant la récréation.",
+          reponse: "finissons", reponses: ["finissons", "nous finissons"],
+          explication: "nous finissons : au pluriel du 2e groupe, on ajoute -iss-." },
+
+        { type: "trou", consigne: "Conjugue « choisir » au présent.",
+          phrase: "Les capitaines … leur équipe.",
+          reponse: "choisissent", reponses: ["choisissent", "ils choisissent"],
+          explication: "ils choisissent (-issent, qu'on n'entend pas)." },
+
+        { type: "cahier", consigne: "Écris tout le présent du verbe « finir » (je, tu, il, nous, vous, ils).",
+          phrase: "verbe : finir (2e groupe)",
+          correction: "je finis, tu finis, il finit, nous finissons, vous finissez, ils finissent.",
+          explication: "Terminaisons du 2e groupe : -is, -is, -it, -issons, -issez, -issent." },
+
+        { type: "cahier", consigne: "Écris tout le présent du verbe « grandir ».",
+          phrase: "verbe : grandir (2e groupe)",
+          correction: "je grandis, tu grandis, il grandit, nous grandissons, vous grandissez, ils grandissent.",
+          explication: "Comme « finir » : -iss- à toutes les personnes du pluriel." },
+
+        { type: "tableau", consigne: "Complète la conjugaison au présent.",
+          verbe: "finir",
+          formes: [
+            { pron: "je", forme: "finis" },
+            { pron: "tu", debut: "fin", fin: "is" },
+            { pron: "il/elle", debut: "fin", fin: "it" },
+            { pron: "nous", forme: "finissons" },
+            { pron: "vous", debut: "fin", fin: "issez" },
+            { pron: "ils/elles", forme: "finissent" }
+          ],
+          explication: "2e groupe : -is, -is, -it, -issons, -issez, -issent." },
+
+        { type: "tableau", consigne: "Complète la conjugaison au présent.",
+          verbe: "réussir",
+          formes: [
+            { pron: "je", debut: "réuss", fin: "is" },
+            { pron: "tu", forme: "réussis" },
+            { pron: "il/elle", forme: "réussit" },
+            { pron: "nous", debut: "réuss", fin: "issons" },
+            { pron: "vous", forme: "réussissez" },
+            { pron: "ils/elles", debut: "réuss", fin: "issent" }
+          ],
+          explication: "réussir : nous réussissons, ils réussissent." },
+
+        { type: "erreur", consigne: "Une forme est mal écrite. Clique dessus.",
+          verbe: "finir",
+          formes: ["je finis", "tu finis", "il finit", "nous finisons", "vous finissez", "ils finissent"],
+          fausse: "nous finisons", correcte: "nous finissons",
+          explication: "Au 2e groupe, « nous » prend deux s : nous finissons." },
+
+        { type: "erreur", consigne: "Une forme est mal écrite. Clique dessus.",
+          verbe: "choisir",
+          formes: ["je choisis", "tu choisis", "il choisit", "nous choisissons", "vous choisisez", "ils choisissent"],
+          fausse: "vous choisisez", correcte: "vous choisissez",
+          explication: "vous choisissez : deux s." }
+      ]
+    },
+
+    /* ====================================================================== */
+    {
+      id: "conj-revision-tableaux",
+      titre: "Révision : les conjugaisons complètes (présent)",
+      questions: [
+        { type: "tableau", consigne: "Complète la conjugaison au présent.",
+          verbe: "chanter",
+          formes: [
+            { pron: "je", forme: "chante" },
+            { pron: "tu", debut: "chant", fin: "es" },
+            { pron: "il/elle", debut: "chant", fin: "e" },
+            { pron: "nous", forme: "chantons" },
+            { pron: "vous", debut: "chant", fin: "ez" },
+            { pron: "ils/elles", forme: "chantent" }
+          ],
+          explication: "1er groupe : -e, -es, -e, -ons, -ez, -ent." },
+
+        { type: "tableau", consigne: "Complète la conjugaison au présent (verbe en -ger).",
+          verbe: "manger",
+          formes: [
+            { pron: "je", debut: "mang", fin: "e" },
+            { pron: "tu", forme: "manges" },
+            { pron: "il/elle", forme: "mange" },
+            { pron: "nous", debut: "mang", fin: "eons" },
+            { pron: "vous", forme: "mangez" },
+            { pron: "ils/elles", debut: "mang", fin: "ent" }
+          ],
+          explication: "manger : « nous mangeons » garde le e pour le son [j]." },
+
+        { type: "tableau", consigne: "Complète la conjugaison au présent (2e groupe).",
+          verbe: "grandir",
+          formes: [
+            { pron: "je", forme: "grandis" },
+            { pron: "tu", debut: "grand", fin: "is" },
+            { pron: "il/elle", forme: "grandit" },
+            { pron: "nous", debut: "grand", fin: "issons" },
+            { pron: "vous", forme: "grandissez" },
+            { pron: "ils/elles", debut: "grand", fin: "issent" }
+          ],
+          explication: "2e groupe : -iss- à tout le pluriel." },
+
+        { type: "tableau", consigne: "Complète la conjugaison du verbe être au présent.",
+          verbe: "être",
+          formes: [
+            { pron: "je", forme: "suis" },
+            { pron: "tu", debut: "", fin: "es" },
+            { pron: "il/elle", forme: "est" },
+            { pron: "nous", forme: "sommes" },
+            { pron: "vous", debut: "", fin: "êtes" },
+            { pron: "ils/elles", debut: "", fin: "sont" }
+          ],
+          explication: "être : je suis, tu es, il est, nous sommes, vous êtes, ils sont." },
+
+        { type: "tableau", consigne: "Complète la conjugaison du verbe avoir au présent.",
+          verbe: "avoir",
+          formes: [
+            { pron: "j'", forme: "ai" },
+            { pron: "tu", forme: "as" },
+            { pron: "il/elle", debut: "", fin: "a" },
+            { pron: "nous", debut: "", fin: "avons" },
+            { pron: "vous", forme: "avez" },
+            { pron: "ils/elles", debut: "", fin: "ont" }
+          ],
+          explication: "avoir : j'ai, tu as, il a, nous avons, vous avez, ils ont." },
+
+        { type: "tableau", consigne: "Complète la conjugaison du verbe aller au présent.",
+          verbe: "aller",
+          formes: [
+            { pron: "je", debut: "", fin: "vais" },
+            { pron: "tu", forme: "vas" },
+            { pron: "il/elle", forme: "va" },
+            { pron: "nous", debut: "", fin: "allons" },
+            { pron: "vous", forme: "allez" },
+            { pron: "ils/elles", debut: "", fin: "vont" }
+          ],
+          explication: "aller : je vais, tu vas, il va, nous allons, vous allez, ils vont." },
+
+        { type: "tableau", consigne: "Complète la conjugaison du verbe faire au présent.",
+          verbe: "faire",
+          formes: [
+            { pron: "je", forme: "fais" },
+            { pron: "tu", forme: "fais" },
+            { pron: "il/elle", forme: "fait" },
+            { pron: "nous", debut: "", fin: "faisons" },
+            { pron: "vous", debut: "", fin: "faites" },
+            { pron: "ils/elles", debut: "", fin: "font" }
+          ],
+          explication: "faire : nous faisons, vous faites, ils font." },
+
+        { type: "tableau", consigne: "Complète la conjugaison du verbe venir au présent.",
+          verbe: "venir",
+          formes: [
+            { pron: "je", forme: "viens" },
+            { pron: "tu", debut: "", fin: "viens" },
+            { pron: "il/elle", forme: "vient" },
+            { pron: "nous", debut: "", fin: "venons" },
+            { pron: "vous", forme: "venez" },
+            { pron: "ils/elles", debut: "", fin: "viennent" }
+          ],
+          explication: "venir : je viens, nous venons, ils viennent (deux n)." },
+
+        { type: "tableau", consigne: "Complète la conjugaison du verbe prendre au présent.",
+          verbe: "prendre",
+          formes: [
+            { pron: "je", forme: "prends" },
+            { pron: "tu", forme: "prends" },
+            { pron: "il/elle", forme: "prend" },
+            { pron: "nous", debut: "", fin: "prenons" },
+            { pron: "vous", debut: "", fin: "prenez" },
+            { pron: "ils/elles", debut: "", fin: "prennent" }
+          ],
+          explication: "prendre : nous prenons, ils prennent (deux n)." },
+
+        { type: "tableau", consigne: "Complète la conjugaison du verbe voir au présent.",
+          verbe: "voir",
+          formes: [
+            { pron: "je", debut: "", fin: "vois" },
+            { pron: "tu", forme: "vois" },
+            { pron: "il/elle", forme: "voit" },
+            { pron: "nous", debut: "", fin: "voyons" },
+            { pron: "vous", forme: "voyez" },
+            { pron: "ils/elles", debut: "", fin: "voient" }
+          ],
+          explication: "voir : nous voyons, ils voient." },
+
+        { type: "erreur", consigne: "Une forme est mal écrite. Clique dessus.",
+          verbe: "être",
+          formes: ["je suis", "tu es", "il est", "nous somme", "vous êtes", "ils sont"],
+          fausse: "nous somme", correcte: "nous sommes",
+          explication: "nous sommes (avec un s)." },
+
+        { type: "erreur", consigne: "Une forme est mal écrite. Clique dessus.",
+          verbe: "aller",
+          formes: ["je vais", "tu vas", "il va", "nous allons", "vous aller", "ils vont"],
+          fausse: "vous aller", correcte: "vous allez",
+          explication: "Avec « vous » : -ez, pas l'infinitif -er." },
+
+        { type: "erreur", consigne: "Une forme est mal écrite. Clique dessus.",
+          verbe: "faire",
+          formes: ["je fais", "tu fais", "il fait", "nous faisons", "vous faisez", "ils font"],
+          fausse: "vous faisez", correcte: "vous faites",
+          explication: "« vous faites », jamais « vous faisez »." },
+
+        { type: "erreur", consigne: "Une forme est mal écrite. Clique dessus.",
+          verbe: "jouer",
+          formes: ["je joue", "tu joues", "il joue", "nous jouons", "vous jouez", "ils joue"],
+          fausse: "ils joue", correcte: "ils jouent",
+          explication: "Avec « ils » : -ent (qu'on n'entend pas)." },
+
+        { type: "erreur", consigne: "Une forme est mal écrite. Clique dessus.",
+          verbe: "réfléchir",
+          formes: ["je réfléchis", "tu réfléchis", "il réfléchit", "nous réfléchissons", "vous réfléchissez", "ils réfléchisent"],
+          fausse: "ils réfléchisent", correcte: "ils réfléchissent",
+          explication: "2e groupe : ils réfléchissent (deux s)." },
+
+        { type: "erreur", consigne: "Une forme est mal écrite. Clique dessus.",
+          verbe: "venir",
+          formes: ["je viens", "tu viens", "il vient", "nous venons", "vous venez", "ils vienent"],
+          fausse: "ils vienent", correcte: "ils viennent",
+          explication: "ils viennent : deux n." },
+
+        { type: "cahier", consigne: "Écris tout le présent du verbe « être ».",
+          phrase: "verbe : être",
+          correction: "je suis, tu es, il est, nous sommes, vous êtes, ils sont.",
+          explication: "À connaître par cœur." },
+
+        { type: "cahier", consigne: "Écris tout le présent du verbe « faire ».",
+          phrase: "verbe : faire",
+          correction: "je fais, tu fais, il fait, nous faisons, vous faites, ils font.",
+          explication: "Pièges : nous faisons, vous faites." },
+
+        { type: "cahier", consigne: "Écris tout le présent du verbe « prendre ».",
+          phrase: "verbe : prendre",
+          correction: "je prends, tu prends, il prend, nous prenons, vous prenez, ils prennent.",
+          explication: "nous prenons (un n), ils prennent (deux n)." },
+
+        { type: "cahier", consigne: "Choisis un verbe en -er et écris tout son présent (je, tu, il, nous, vous, ils).",
+          phrase: "un verbe du 1er groupe au choix",
+          correction: "Exemple avec « regarder » : je regarde, tu regardes, il regarde, nous regardons, vous regardez, ils regardent.",
+          explication: "Tous les verbes en -er suivent ce modèle." }
       ]
     }
 

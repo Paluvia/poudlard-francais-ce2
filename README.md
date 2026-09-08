@@ -35,7 +35,7 @@ Pour arrêter le serveur : `Ctrl + C`.
 | **Sorciers** | Liste des enfants. On choisit qui joue, on crée un nouveau sorcier, on gère (renommer via suppression + recréation, supprimer), on exporte / importe les sauvegardes. |
 | **Nouveau sorcier** | Prénom + répartition dans une maison (test du Choixpeau ou choix direct). |
 | **Accueil** | Bandeau du sorcier en cours + choix de l'entraînement. Chaque thème affiche le nombre de questions **encore à découvrir**. |
-| **Question / réponse** | 10 questions par session (moins si presque tout est réussi). Points de magie à chaque bonne réponse, bonus de série. |
+| **Question / réponse** | 6 questions courtes par session (moins si presque tout est réussi). Points de magie à chaque bonne réponse, bonus de série. |
 | **Ma progression** | Avatar qui évolue, années de Poudlard, sorts débloqués, statistiques (dont « questions maîtrisées »). Boutons : changer de sorcier, changer de maison, **revoir toutes les questions**, remettre à zéro cette fiche. |
 
 ## Questions déjà réussies
@@ -44,9 +44,21 @@ Pour arrêter le serveur : `Ctrl + C`.
 - Quand elle est **ratée**, elle reviendra dans une prochaine session.
 - Bouton **« Revoir toutes les questions »** (écran Progression) : remet tout
   dans les « à découvrir », sans toucher aux points ni aux sorts.
-- Une session vise **environ 1 question sur 3 de type « cahier »** : l'enfant
-  écrit la phrase sur son cahier, affiche la correction, compare, puis coche
-  « j'avais tout bon » ou « j'avais une erreur » (auto-évaluation).
+- Une session vise **environ 1 question sur 3 « lente »** (type `cahier` ou
+  `tableau`).
+
+### Les 5 types de questions
+
+- **`qcm`** — choisir parmi des boutons.
+- **`trou`** — écrire la réponse au clavier.
+- **`cahier`** — écrire sur le cahier, afficher la correction, s'auto-évaluer
+  (« j'avais tout bon » / « j'avais une erreur »).
+- **`tableau`** — compléter une conjugaison complète (plusieurs cases ; la
+  conjugaison entière je→ils s'affiche à la correction).
+- **`erreur`** — repérer la forme mal écrite dans une conjugaison affichée en
+  entier.
+
+Le format exact de chaque type est décrit en tête de `contenu.js`.
 
 ## Animation de félicitations
 
@@ -160,19 +172,23 @@ le contenu de `#ciel` par un `<img>` ou un `background-image`.
 
 ## Contenu actuel — Période 1 (rentrée CE2)
 
-**≈ 150 questions, 8 thèmes** (dont ~1/3 à écrire sur le cahier) :
+**≈ 190 questions, 10 thèmes** :
 
 1. Le présent : **être et avoir** (+ homophones a/à, on/ont, est/es/et, son/sont)
 2. Le présent : **aller, faire et dire** (+ à/au/aux ; « vous faites », « vous dites »)
 3. Le présent : **les verbes en -er** (nous mangeons / commençons, -ent muet,
    -er vs -ez, sujet = groupe nominal)
-4. **Les homophones** grammaticaux (a/à, et/est, on/ont, son/sont, ou/où)
-5. **Les sons difficiles et les accents** (m devant m/b/p, gn, ill, ph, ç,
+4. Le présent : **verbes du 2e groupe (-ir)** (finir, choisir… « nous finissons »)
+5. **Révision : les conjugaisons complètes** — types `tableau` (compléter je→ils)
+   et `erreur` (repérer la forme fautive), sur les 3 groupes + verbes fréquents
+   du 3e (venir, voir, prendre…)
+6. **Les homophones** grammaticaux (a/à, et/est, on/ont, son/sont, ou/où)
+7. **Les sons difficiles et les accents** (m devant m/b/p, gn, ill, ph, ç,
    é/è/ê, mots à orthographe piégeuse)
-6. **Lettres muettes finales et pluriel des noms** (peti**t**, bor**d**… ;
+8. **Lettres muettes finales et pluriel des noms** (peti**t**, bor**d**… ;
    -s / -x / -aux ; cheval → chevaux)
-7. **Les mots invariables** (liste CE2 élargie, en phrases)
-8. **L'ordre alphabétique** (classer des mots, lettre avant / après)
+9. **Les mots invariables** (liste CE2 élargie, en phrases)
+10. **L'ordre alphabétique** (classer des mots, lettre avant / après)
 
 Niveau visé : **CE2 début d'année** (consolidation du CE1 + nouvelles notions).
 Pour ajuster, voir *« Régler la difficulté »* ci-dessous et éditer `contenu.js`.
