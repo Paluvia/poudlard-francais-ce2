@@ -696,7 +696,29 @@
   // themes = tableau de thèmes (voir PERIODES). On enlève les questions déjà
   // réussies, on vise environ 1/3 de questions "lentes" (cahier / tableau), et
   // on ne rallonge jamais la session en répétant des questions.
-  const TYPES_LENTS = ["cahier", "tableau"];
+  const TYPES_LENTS = ["cahier", "tableau"];        // les plus lentes (compte pour le ratio 1/3)
+  const TYPES_ECRIT = ["cahier", "tableau", "trou"]; // demandent d'écrire (cahier ou clavier)
+  function estEcrit(q) { return TYPES_ECRIT.indexOf(q.type) !== -1; }
+
+  // Réordonne une liste de questions pour ne jamais enchaîner deux questions
+  // "à écrire" : après une phase lente, l'exercice suivant est un simple clic.
+  function espacerEcrits(qs) {
+    const ecrits = qs.filter(estEcrit);
+    const clics = qs.filter(q => !estEcrit(q));
+    const out = [];
+    let dernierEcrit = false;
+    while (ecrits.length || clics.length) {
+      let prendreClic;
+      if (dernierEcrit && clics.length) prendreClic = true;   // interdit deux "écrire" de suite
+      else if (!ecrits.length) prendreClic = true;
+      else if (!clics.length) prendreClic = false;
+      else prendreClic = clics.length > ecrits.length;        // sinon on équilibre
+      if (prendreClic) { out.push(clics.shift()); dernierEcrit = false; }
+      else { out.push(ecrits.shift()); dernierEcrit = true; }
+    }
+    return out;
+  }
+
   function demarrerSession(themes) {
     const toutes = collecterQuestions(themes);
     let dispo = toutes.filter(q => !estReussie(q));
@@ -715,15 +737,20 @@
     const nbLentsVoulu = Math.round(cible / 3);
 
     const lents = melanger(dispo.filter(q => TYPES_LENTS.indexOf(q.type) !== -1));
-    const autres = melanger(dispo.filter(q => TYPES_LENTS.indexOf(q.type) === -1));
+    const clics = melanger(dispo.filter(q => !estEcrit(q)));   // qcm, erreur (clic seul)
+    const trous = melanger(dispo.filter(q => q.type === "trou"));
 
     const nbLents = Math.min(nbLentsVoulu, lents.length);
-    let choisies = lents.slice(0, nbLents).concat(autres.slice(0, cible - nbLents));
+    let choisies = lents.slice(0, nbLents);
+    choisies = choisies.concat(clics.slice(0, cible - choisies.length));
+    if (choisies.length < cible) {
+      choisies = choisies.concat(trous.slice(0, cible - choisies.length));
+    }
     if (choisies.length < cible) {
       const reste = dispo.filter(q => choisies.indexOf(q) === -1);
       choisies = choisies.concat(melanger(reste).slice(0, cible - choisies.length));
     }
-    choisies = melanger(choisies);
+    choisies = espacerEcrits(melanger(choisies));
 
     session = {
       questions: choisies,
@@ -1198,21 +1225,31 @@
       el.classList.add("fanfare");
     });
 
-    const recompense = anneeApres > anneeAvant || nouveauxSorts.length > 0 || diplome;
-    if (recompense) {
-      let sous;
-      if (diplome) sous = "Sorcier·ère diplômé·e de Poudlard !";
-      else if (nouveauxSorts.length) sous = "Nouveau sort : " + nouveauxSorts[0].nom + " " + nouveauxSorts[0].embleme;
-      else sous = "Tu passes en année " + anneeApres + " ! 🎓";
-      celebrer({ grand: true, titre: "BRAVO ⚡", sousTitre: sous });
-    } else {
-      const parfait = session.bonnes === session.questions.length;
-      celebrer({
-        titre: parfait ? "Sans faute ! ✨" : "Bravo !",
-        sousTitre: session.bonnes + " / " + session.questions.length + "  ·  +" + session.xpGagne + " points de magie",
-      });
-    }
+    // --- Félicitations nominatives, à CHAQUE fin de session ---------------
+    let sous;
+    if (diplome) sous = "Sorcier·ère diplômé·e de Poudlard ! 🏰";
+    else if (nouveauxSorts.length) sous = "Nouveau sort : " + nouveauxSorts[0].nom + " " + nouveauxSorts[0].embleme;
+    else if (anneeApres > anneeAvant) sous = "Tu passes en année " + anneeApres + " ! 🎓";
+    else sous = session.bonnes + " / " + session.questions.length + "  ·  +" + session.xpGagne + " points de magie";
+
+    celebrer({
+      grand: true,
+      titre: felicitationNominative(etat.nom, session.bonnes, session.questions.length),
+      sousTitre: sous,
+    });
   }
+
+  // Un message de félicitations qui nomme l'enfant et reste toujours positif.
+  function felicitationNominative(nom, bonnes, total) {
+    const p = nom ? " " + nom : "";
+    let phrase;
+    if (bonnes === total)              phrase = "Sans aucune faute" + p + " ! 🌟";
+    else if (bonnes >= Math.ceil(total * 0.8)) phrase = "Superbe travail" + p + " !";
+    else if (bonnes >= Math.ceil(total / 2))   phrase = pick(["Bravo" + p + " !", "Bien joué" + p + " !", "Tu assures" + p + " !"]);
+    else                              phrase = "Bel effort" + p + " ! Tu progresses. 💪";
+    return phrase;
+  }
+  function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
   document.getElementById("btn-encore").addEventListener("click", () => montrer("ecran-accueil"));
   document.getElementById("btn-voir-progression").addEventListener("click", () => montrer("ecran-progression"));

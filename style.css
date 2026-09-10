@@ -604,7 +604,9 @@ label.interrupteur { display: flex; align-items: center; gap: 8px; font-size: .9
 #celebration .titre-celeb {
   position: relative;
   font-family: "Cinzel", Georgia, serif;
-  font-size: clamp(2rem, 9vw, 4.5rem);
+  font-size: clamp(1.8rem, 7vw, 3.6rem);
+  line-height: 1.15;
+  max-width: 92vw;
   color: #fff6d8;
   text-align: center;
   text-shadow:

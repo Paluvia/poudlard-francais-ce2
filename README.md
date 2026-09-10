@@ -46,6 +46,9 @@ Pour arrêter le serveur : `Ctrl + C`.
   dans les « à découvrir », sans toucher aux points ni aux sorts.
 - Une session vise **environ 1 question sur 3 « lente »** (type `cahier` ou
   `tableau`).
+- **Jamais deux exercices « à écrire » de suite** : après une question à
+  rédiger (`cahier`, `tableau` ou `trou`), la suivante est toujours un simple
+  clic (`qcm` / `erreur`). Cf. `espacerEcrits()` dans `app.js`.
 
 ### Les 5 types de questions
 
@@ -62,13 +65,15 @@ Le format exact de chaque type est décrit en tête de `contenu.js`.
 
 ## Animation de félicitations
 
-À la fin d'un entraînement, une **gerbe d'étincelles** s'affiche. Si l'enfant
-**débloque une récompense** (nouvelle année de Poudlard, nouveau sort, diplôme)
-ou est **réparti dans sa maison**, l'animation est plus grande : voile magique,
-grand « BRAVO » et pluie d'étoiles, et les cartes de récompense rebondissent.
+**À chaque fin de session**, une animation plein écran félicite l'enfant **en le
+nommant** — voile magique, grand titre (« Bravo Léa ! », « Superbe travail
+Léa ! », « Sans aucune faute Léa ! 🌟 »… le message s'adapte au score et reste
+toujours positif), pluie d'étoiles, et sous-titre avec le score ou la récompense.
+Les cartes de récompense (nouvelle année, sort, diplôme) rebondissent en dessous.
+
 Le tout respecte le réglage système « réduire les animations » et le bouton
-**Sons**. Code : fonction `celebrer()` dans `app.js`, styles `#celebration`
-dans `style.css`.
+**Sons**. Code : `celebrer()` et `felicitationNominative()` dans `app.js`,
+styles `#celebration` dans `style.css`.
 
 ## Plusieurs enfants
 
