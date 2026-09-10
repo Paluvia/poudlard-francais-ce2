@@ -279,6 +279,33 @@ button.secondaire:hover { background: var(--parchemin-fonce); }
   font-family: inherit;
 }
 
+/* Lien discret « Signaler un problème » sous une question */
+.lien-signaler {
+  display: block;
+  margin: 16px auto 0;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: .8rem;
+  color: var(--encre-claire);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  opacity: .8;
+}
+.lien-signaler:hover { opacity: 1; color: var(--bordeaux); }
+
+/* Pied de page : version + signalement (hors carte, sur le fond nuit) */
+#pied {
+  text-align: center;
+  font-size: .72rem;
+  color: rgba(244, 233, 210, .5);
+  padding: 26px 12px 6px;
+  line-height: 1.6;
+}
+#pied a { color: rgba(244, 233, 210, .7); text-decoration: none; }
+#pied a:hover { color: #f2d97e; text-decoration: underline; }
+
 /* ---------- Barre d'expérience ---------- */
 .barre-xp {
   height: 14px;
@@ -589,7 +616,7 @@ label.interrupteur { display: flex; align-items: center; gap: 8px; font-size: .9
 }
 #celebration.grand { background: rgba(11, 16, 38, .5); }
 #celebration.on { animation: celeb-fond 1.7s ease forwards; }
-#celebration.on.grand { animation: celeb-fond 3s ease forwards; }
+#celebration.on.grand { animation: celeb-fond 4s ease forwards; }
 @keyframes celeb-fond {
   0%   { opacity: 0; }
   12%  { opacity: 1; }
@@ -633,7 +660,7 @@ label.interrupteur { display: flex; align-items: center; gap: 8px; font-size: .9
   opacity: 0;
   text-shadow: 0 2px 10px rgba(0,0,0,.55);
 }
-#celebration.on .sous-titre-celeb { animation: celeb-fond 2.6s ease .35s forwards; }
+#celebration.on .sous-titre-celeb { animation: celeb-fond 3.6s ease .35s forwards; }
 
 #celebration .particule {
   position: absolute;

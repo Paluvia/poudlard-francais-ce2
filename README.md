@@ -61,15 +61,34 @@ Pour arrêter le serveur : `Ctrl + C`.
 - **`erreur`** — repérer la forme mal écrite dans une conjugaison affichée en
   entier.
 
+Chaque question a un **`id` unique et stable** (`etre-avoir-04`). On peut donc
+corriger le texte d'une question **sans** remettre les élèves à zéro dessus.
 Le format exact de chaque type est décrit en tête de `contenu.js`.
+
+## Signaler un problème
+
+- Un lien **« 🐞 Signaler un problème sur cette question »** sous chaque question,
+  et **« Signaler un problème »** dans le pied de page.
+- Le clic ouvre une **issue GitHub pré-remplie** (dépôt `Paluvia/poudlard-francais-ce2`) :
+  id de la question, énoncé complet, réponse donnée par l'élève et verdict,
+  version de l'appli, date. Il faut être connecté à GitHub pour valider l'envoi.
+- Code : `ouvrirSignalement()` / `ouvrirIssue()` dans `app.js`.
+
+## Version
+
+Le numéro de version est affiché **en pied de page** (`v1.6 · 10 sept. 2026`),
+avec un lien vers **`CHANGELOG.md`**, et écrit dans la console au chargement.
+Il se règle à la main : constante `APP_VERSION` en haut de `app.js`, à
+incrémenter dans le même commit que le changement (voir `CHANGELOG.md`).
 
 ## Animation de félicitations
 
-**À chaque fin de session**, une animation plein écran félicite l'enfant **en le
-nommant** — voile magique, grand titre (« Bravo Léa ! », « Superbe travail
-Léa ! », « Sans aucune faute Léa ! 🌟 »… le message s'adapte au score et reste
-toujours positif), pluie d'étoiles, et sous-titre avec le score ou la récompense.
-Les cartes de récompense (nouvelle année, sort, diplôme) rebondissent en dessous.
+**À chaque fin de session**, une animation plein écran (**~4 s**) félicite
+l'enfant **en le nommant** — voile magique, grand titre (« Bravo Léa ! »,
+« Superbe travail Léa ! », « Sans aucune faute Léa ! 🌟 »… le message s'adapte au
+score et reste toujours positif), pluie d'étoiles, et sous-titre avec le score
+ou la récompense. Les cartes de récompense (nouvelle année, sort, diplôme)
+rebondissent en dessous.
 
 Le tout respecte le réglage système « réduire les animations » et le bouton
 **Sons**. Code : `celebrer()` et `felicitationNominative()` dans `app.js`,

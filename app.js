@@ -12,6 +12,15 @@
   "use strict";
 
   /* ===========================================================================
+     0. VERSION  (à incrémenter à chaque changement — voir CHANGELOG.md)
+        num : "1.6"  -> on augmente le 2e chiffre pour du contenu / des features,
+                        un éventuel 3e chiffre pour des correctifs seuls.
+     =========================================================================== */
+
+  const APP_VERSION = { num: "1.6", date: "2026-09-10" };
+  const DEPOT_GITHUB = "Paluvia/poudlard-francais-ce2";
+
+  /* ===========================================================================
      1. PARAMÈTRES DU JEU  (faciles à ajuster)
      =========================================================================== */
 
@@ -218,17 +227,14 @@
     return { pourcent, texte: xp + " / " + suivant.seuil + " points de magie" };
   }
 
-  // Clé stable d'une question, pour retenir qu'elle a été réussie.
-  // Elle dépend du thème et du texte : modifier le texte "réinitialise" la question.
+  // Clé stable d'une question pour mémoriser qu'elle a été réussie.
+  // Depuis que chaque question a un "id" fixe dans contenu.js, on l'utilise
+  // directement : on peut corriger le texte d'une question sans remettre les
+  // élèves à zéro. (Repli sur un hash pour une éventuelle question sans id.)
   function cleQuestion(q) {
-    let base;
-    if (q.type === "tableau" || q.type === "erreur") {
-      base = (q._themeId || "") + "|" + q.type + "|" + (q.verbe || "") + "|" +
-             (q.consigne || "") + "|" + (q.fausse || "") + "|" +
-             (q.formes ? JSON.stringify(q.formes) : "");
-    } else {
-      base = (q._themeId || "") + "|" + (q.type || "") + "|" + (q.phrase || "");
-    }
+    if (q.id) return "q:" + q.id;
+    let base = (q._themeId || "") + "|" + (q.type || "") + "|" +
+               (q.phrase || q.verbe || "") + "|" + (q.consigne || "");
     let h = 0;
     for (let i = 0; i < base.length; i++) h = (Math.imul(h, 31) + base.charCodeAt(i)) | 0;
     return "q" + (h >>> 0).toString(36);
@@ -380,8 +386,78 @@
     }
 
     document.body.appendChild(c);
-    requestAnimationFrame(() => c.classList.add("on"));
-    setTimeout(() => c.remove(), opts.grand ? 3200 : 1900);
+    void c.offsetWidth;              // force le calcul de style avant de lancer l'animation
+    c.classList.add("on");          // (pas de requestAnimationFrame : peu fiable en arrière-plan)
+    setTimeout(() => c.remove(), opts.grand ? 4200 : 1900);
+  }
+
+  /* ===========================================================================
+     6ter. SIGNALER UN PROBLÈME  (ouvre une issue GitHub pré-remplie)
+     =========================================================================== */
+
+  function dateFr(iso) {
+    try {
+      return new Date(iso + "T12:00:00").toLocaleDateString("fr-FR",
+        { day: "numeric", month: "short", year: "numeric" });
+    } catch (e) { return iso; }
+  }
+
+  // Récapitule le contenu d'une question pour le corps de l'issue.
+  function detailsQuestion(q) {
+    const l = [];
+    if (q.consigne) l.push("- **consigne** : " + q.consigne);
+    if (q.phrase) l.push("- **énoncé** : " + q.phrase);
+    if (q.verbe) l.push("- **verbe** : " + q.verbe);
+    if (q.choix) l.push("- **choix** : " + q.choix.join(" / "));
+    if (q.reponse) l.push("- **réponse attendue** : " + q.reponse);
+    if (q.reponses && q.reponses.length > 1) l.push("- **variantes acceptées** : " + q.reponses.join(" / "));
+    if (q.correction) l.push("- **correction modèle** : " + q.correction);
+    if (q.type === "erreur" && q.formes) {
+      l.push("- **formes proposées** : " + q.formes.join(" / "));
+      l.push("- **forme fausse → correcte** : " + q.fausse + " → " + q.correcte);
+    }
+    if (q.type === "tableau" && q.formes) {
+      l.push("- **conjugaison** : " + q.formes.map(function (f) {
+        return f.pron + " " + (f.forme != null ? f.forme : (f.debut + "[" + f.fin + "]"));
+      }).join(", "));
+    }
+    if (q.explication) l.push("- **explication** : " + q.explication);
+    return l.join("\n");
+  }
+
+  function ouvrirSignalement(q) {
+    const info = (session && session.infoReponse) ? session.infoReponse : null;
+    const etiquette = (q.consigne || q.phrase || q.verbe || "").replace(/\s+/g, " ").trim().slice(0, 60);
+    const titre = "[Question] " + (q.id || "?") + " — " + etiquette;
+
+    let corps =
+      "## Que se passe-t-il ?\n" +
+      "_(un bug, une consigne pas claire, une correction fausse… décris ici)_\n\n\n\n" +
+      "---\n" +
+      "### Détails (ne pas modifier)\n" +
+      "- **id** : `" + (q.id || "sans id") + "`\n" +
+      "- **thème** : " + (q._theme || "") + "\n" +
+      "- **type** : " + q.type + "\n" +
+      detailsQuestion(q) + "\n";
+    if (info) {
+      corps += "- **réponse de l'élève** : " + info.texte +
+               " — jugée " + (info.juste ? "correcte ✅" : "incorrecte ❌") + "\n";
+    }
+    corps += "- **version** : v" + APP_VERSION.num + " (" + APP_VERSION.date + ")\n";
+    corps += "- **date du signalement** : " + new Date().toLocaleString("fr-FR") + "\n";
+    if (etat && etat.nom) corps += "- **profil** : " + etat.nom + "\n";
+
+    if (corps.length > 5500) corps = corps.slice(0, 5500) + "\n… (tronqué)";
+
+    ouvrirIssue(titre, corps);
+  }
+
+  function ouvrirIssue(titre, corps) {
+    const url = "https://github.com/" + DEPOT_GITHUB + "/issues/new" +
+      "?labels=" + encodeURIComponent("question") +
+      "&title=" + encodeURIComponent(titre) +
+      "&body=" + encodeURIComponent(corps);
+    window.open(url, "_blank", "noopener");
   }
 
   /* ===========================================================================
@@ -774,9 +850,18 @@
   const elZone = document.getElementById("quiz-zone-reponse");
   const elRetour = document.getElementById("quiz-retour");
   const elContinuer = document.getElementById("quiz-continuer");
+  const elSignaler = document.getElementById("quiz-signaler");
+  if (elSignaler) {
+    elSignaler.addEventListener("click", () => {
+      if (session && session.questions[session.index]) {
+        ouvrirSignalement(session.questions[session.index]);
+      }
+    });
+  }
 
   function rendreQuestion() {
     session.repondu = false;
+    session.infoReponse = null;
     const q = session.questions[session.index];
 
     elCompteur.textContent = "Question " + (session.index + 1) + " / " + session.questions.length;
@@ -844,12 +929,12 @@
     btnOui.addEventListener("click", () => {
       if (session.repondu || btnOui.disabled) return;
       wrap.querySelectorAll("button").forEach(b => b.disabled = true);
-      finaliserReponse(q, true, { montrerReponse: false });
+      finaliserReponse(q, true, { montrerReponse: false, infoReponse: "auto-évaluation : « j'avais tout bon »" });
     });
     btnNon.addEventListener("click", () => {
       if (session.repondu || btnNon.disabled) return;
       wrap.querySelectorAll("button").forEach(b => b.disabled = true);
-      finaliserReponse(q, false, { montrerReponse: false });
+      finaliserReponse(q, false, { montrerReponse: false, infoReponse: "auto-évaluation : « j'avais une erreur »" });
     });
   }
 
@@ -937,9 +1022,11 @@
 
   function validerTableau(q, wrap) {
     let toutJuste = true;
+    const saisies = [];
     wrap.querySelectorAll("input").forEach(inp => {
       const f = q.formes[+inp.dataset.i];
       const saisi = inp.value.trim();
+      saisies.push(f.pron + " = « " + saisi + " »");
       const ok = normalise(saisi) === normalise(f.fin) ||
                  normalise(saisi) === normalise((f.debut || "") + f.fin);
       inp.disabled = true;
@@ -959,7 +1046,10 @@
     ligne.textContent = conjugaisonEnLigne(q.formes);
     wrap.appendChild(ligne);
 
-    finaliserReponse(q, toutJuste, { detailFaux: "Compare avec la conjugaison complète ci-dessus." });
+    finaliserReponse(q, toutJuste, {
+      detailFaux: "Compare avec la conjugaison complète ci-dessus.",
+      infoReponse: "a saisi " + saisies.join(", ")
+    });
   }
 
   /* --- Type "erreur" : trouver la forme mal écrite --------------------------
@@ -1010,7 +1100,8 @@
     wrap.appendChild(ligne);
 
     finaliserReponse(q, juste, {
-      detailFaux: "La forme mal écrite était « " + q.fausse + " » → il faut écrire « " + q.correcte + " »."
+      detailFaux: "La forme mal écrite était « " + q.fausse + " » → il faut écrire « " + q.correcte + " ».",
+      infoReponse: "a cliqué sur « " + forme + " »"
     });
   }
 
@@ -1103,7 +1194,10 @@
       elZone.querySelectorAll(".zone-saisie > button.gros").forEach(b => b.hidden = true);
     }
 
-    finaliserReponse(q, juste, { montrerReponse: true });
+    finaliserReponse(q, juste, {
+      montrerReponse: true,
+      infoReponse: "« " + reponseDonnee + " »"
+    });
   }
 
   // Étape commune : score, points, retenue de la réussite, message, suite.
@@ -1111,6 +1205,7 @@
     if (session.repondu) return;
     session.repondu = true;
     opts = opts || {};
+    session.infoReponse = opts.infoReponse ? { texte: opts.infoReponse, juste: juste } : null;
     etat.totalReponses += 1;
 
     if (juste) {
@@ -1169,7 +1264,7 @@
   }
 
   elContinuer.addEventListener("click", () => {
-    if (!session || !session.repondu || elContinuer.disabled) return;
+    if (!session || !session.repondu || session.termine || elContinuer.disabled) return;
     session.index += 1;
     if (session.index < session.questions.length) rendreQuestion();
     else terminerSession();
@@ -1180,6 +1275,8 @@
      =========================================================================== */
 
   function terminerSession() {
+    if (session.termine) return;   // une seule fois
+    session.termine = true;
     const anneeAvant = anneeActuelle(session.xpAvant).num;
     const anneeApres = anneeActuelle(etat.xp).num;
     const sortsAvant = sortsDebloques(session.xpAvant).map(s => s.id);
@@ -1402,7 +1499,28 @@
      17. DÉMARRAGE
      =========================================================================== */
 
+  function rendrePied() {
+    const p = document.getElementById("pied");
+    if (!p) return;
+    const lienRepo = "https://github.com/" + DEPOT_GITHUB;
+    const titreRetour = "[Retour général] (v" + APP_VERSION.num + ")";
+    const corpsRetour = "## Ton retour\n_(idée, bug, remarque générale…)_\n\n\n\n---\n" +
+      "- **version** : v" + APP_VERSION.num + " (" + APP_VERSION.date + ")\n";
+    p.innerHTML =
+      'École de Sorcellerie · ' +
+      '<a href="' + lienRepo + '/blob/main/CHANGELOG.md" target="_blank" rel="noopener">v' +
+        APP_VERSION.num + '</a> · ' + dateFr(APP_VERSION.date) +
+      ' · <a href="#" id="pied-signaler">Signaler un problème</a>';
+    const s = document.getElementById("pied-signaler");
+    if (s) s.addEventListener("click", e => { e.preventDefault(); ouvrirIssue(titreRetour, corpsRetour); });
+  }
+
   decorerCiel();
+  rendrePied();
+  try {
+    console.log("%cÉcole de Sorcellerie — Français CE2  ·  v" + APP_VERSION.num + " (" + APP_VERSION.date + ")",
+      "color:#c9a227;font-weight:bold");
+  } catch (e) {}
 
   if (etat && etat.maison) {
     appliquerCouleursMaison(etat.maison);
