@@ -17,7 +17,7 @@
                         un éventuel 3e chiffre pour des correctifs seuls.
      =========================================================================== */
 
-  const APP_VERSION = { num: "1.6", date: "2026-09-10" };
+  const APP_VERSION = { num: "1.7", date: "2026-09-15" };
   const DEPOT_GITHUB = "Paluvia/poudlard-francais-ce2";
 
   /* ===========================================================================

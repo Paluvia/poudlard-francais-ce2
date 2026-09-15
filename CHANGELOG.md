@@ -5,6 +5,11 @@ On augmente le 2ᵉ chiffre pour du contenu ou des fonctionnalités,
 un éventuel 3ᵉ chiffre pour des correctifs seuls.
 _(Les versions antérieures à la v1.6 sont numérotées après coup, d'après l'historique git.)_
 
+## v1.7 — 2026-09-15
+- Format « mot à compléter partiellement » remplacé par la saisie du mot
+  entier sur les deux questions concernées (`lettre-finale-pluriel-06`,
+  `lettre-finale-pluriel-07`), suite au retour reçu dans l'issue #1.
+
 ## v1.6 — 2026-09-10
 - **Bouton « Signaler un problème »** sous chaque question et dans le pied de page :
   ouvre une **issue GitHub pré-remplie** (id de la question, énoncé, réponse de

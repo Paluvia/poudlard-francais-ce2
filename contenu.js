@@ -657,14 +657,14 @@ const periode1 = {
           choix: ["g", "t", "d"], reponse: "g",
           explication: "ranger, rangée → un rang (avec un « g »)." },
 
-        { id: "lettre-finale-pluriel-06", type: "trou", consigne: "Écris la lettre muette finale. (pense à « tapisser »)",
-          phrase: "un tapi… de sorcier  →  tapi…",
-          reponse: "s", reponses: ["s"],
+        { id: "lettre-finale-pluriel-06", type: "trou", consigne: "Écris le mot en entier, avec sa lettre finale muette. (pense à « tapisser »)",
+          phrase: "Dans la salle commune, il y a un … moelleux devant la cheminée.",
+          reponse: "tapis", reponses: ["tapis"],
           explication: "tapisser → un tapis." },
 
-        { id: "lettre-finale-pluriel-07", type: "trou", consigne: "Écris la lettre muette finale. (pense à « nicher »)",
-          phrase: "un ni… d'oiseau  →  ni…",
-          reponse: "d", reponses: ["d"],
+        { id: "lettre-finale-pluriel-07", type: "trou", consigne: "Écris le mot en entier, avec sa lettre finale muette. (pense à « nicher »)",
+          phrase: "Hedwige a construit son … tout en haut de la tour.",
+          reponse: "nid", reponses: ["nid"],
           explication: "nicher → un nid (avec un « d »)." },
 
         { id: "lettre-finale-pluriel-08", type: "qcm", consigne: "Choisis le pluriel correct.",
